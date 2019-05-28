@@ -1,0 +1,36 @@
+prefix: 'resnet34_256d'
+parallel: yes
+save_freq: 5
+num_workers: 12
+
+model_name: 'resnet34'
+margin_name: 'arc_margin'
+features: 256
+num_classes: 85742
+input_size: 112
+
+criterion: 'FocalLoss'
+optimizer: 'SGD'
+
+learning_rate: 0.1
+weight_decay: 0.0001
+momentum: 0.9
+milestones: [6, 12, 18, 24]
+batch_size: 512
+num_epochs: 30
+
+train:
+    folder: '/data/home/rvlasov/data/insightface'
+    dataset: 'ms1mv2'
+
+snapshot:
+    use: no
+    epoch: 25
+    
+validataion:
+    folder: '/data/home/rvlasov/data/insightface'
+    dataset: ['lfw', 'cfp_fp', 'agedb_30']
+    batch_size: 8
+    epoch: 30
+    flip: yes
+    #weights: 'weights/resnet34_256d_30e.pth'
