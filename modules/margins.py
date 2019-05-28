@@ -5,9 +5,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-__all__ = ['arc_margin', 'cos_margin']
-
-
 class ArcMarginProduct(nn.Module):
     def __init__(self, in_features, out_features, s=64.0, m=0.50, easy_margin=False):
         super(ArcMarginProduct, self).__init__()
@@ -72,5 +69,5 @@ def arc_margin(in_features, out_features, s=64.0, m=0.50, easy_margin=False, dev
 
 
 def add_margin(in_features, out_features, s=30.0, m=0.40, device='cpu'):
-    margin = ArcMarginProduct(in_features, out_features, s, m)
+    margin = AddMarginProduct(in_features, out_features, s, m)
     return margin.to(device)
