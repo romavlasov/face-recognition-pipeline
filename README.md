@@ -10,7 +10,7 @@
 
 5. Test model <code>python test.py --config "configuration file"</code>
 
-Results on pretrained models:
+Results on trained models:
 
 | Models        | LFW      | CFP_FP   | AGEDB_30 |
 | ------------- |:--------:|:--------:|---------:|
