@@ -11,6 +11,9 @@ def load_weights(model, prefix, model_type, epoch):
 
 
 def save_weights(model, prefix, model_type, epoch, parallel=True):
+    if not os.path.exists('snapshots'):
+        os.makedirs('snapshots')
+        
     file = os.path.join('snapshots',
                         '{}_{}_epoch_{}.pth'.format(prefix,
                                                     model_type, 
