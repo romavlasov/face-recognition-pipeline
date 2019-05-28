@@ -4,7 +4,7 @@
 
 2. Prepare dataset <code> python tools/process_records.py --folder "path to extracted dataset" </code>
 
-3. Update/create configuration file. Set up path to extracted dataset to __folder__ in configuration file
+3. Update/create configuration file. Set up path to extracted dataset in configuration file (folder: "extracted dataset")
 
 4. Train model <code>python train.py --config "configuration file"</code>
 
