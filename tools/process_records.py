@@ -14,6 +14,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     folder = args.folder
+    
+    image_folder = os.path.join(folder, 'train')
+    if not os.path.exists(image_folder):
+        os.makedirs(image_folder)
+        
     path_imgidx = os.path.join(folder, 'train.idx')
     path_imgrec = os.path.join(folder, 'train.rec')
     imgrec = mx.recordio.MXIndexedRecordIO(path_imgidx, path_imgrec, 'r')
@@ -25,8 +30,7 @@ if __name__ == '__main__':
         train.append({'label': int(header.label[0] if isinstance(header.label, np.ndarray) else header.label),
                       'image': '{:07d}.jpg'.format(header.id)})
 
-        with open(os.path.join(folder,
-                               'train',
+        with open(os.path.join(image_folder, 
                                '{:07d}.jpg'.format(header.id)), 'wb') as f:
             f.write(blob)
 
