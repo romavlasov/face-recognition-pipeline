@@ -10,10 +10,10 @@
 
 5. Test model <code>python test.py --config "configuration file"</code>
 
-[Pretrained models](https://www.dropbox.com/s/vdiwwg9je3tmwkh/weights.zip?dl=0) - mobilenet, resnet34, se_resnext50
+Results on pretrained models:
 
 | Models        | LFW      | CFP_FP   | AGEDB_30 |
 | ------------- |:--------:|:--------:|---------:|
-| MobileNet     | 0.9958   | 0.9573   | 0.9650   |
-| Resnet34      | 0.9975   | 0.9764   | 0.9760   |
-| SEResNeXt50   | 0.9975   | 0.9877   | 0.9792   |
+| [MobileNet](https://www.dropbox.com/s/pjgpefh05q3bdko/mobilenet_256d_30e.pth?dl=0)     | 0.9958   | 0.9573   | 0.9650   |
+| [Resnet34](https://www.dropbox.com/s/pgbm5xrsmgtg8z0/resnet34_256d_30e.pth?dl=0)      | 0.9975   | 0.9764   | 0.9760   |
+| [SEResNeXt50](https://www.dropbox.com/s/aq6imy2o74md6nx/se_resnext50_256d_30e.pth?dl=0)   | 0.9975   | 0.9877   | 0.9792   |
