@@ -141,4 +141,5 @@ class Xception(nn.Module):
         x = self.conv4(x)
         x = self.bn4(x)
         x = self.fc(x)
+        x = x.view(x.size(0), -1)
         return x
