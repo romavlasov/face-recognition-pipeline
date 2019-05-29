@@ -21,7 +21,6 @@ class Train(data.Dataset):
         return len(self.annotation)
 
     def __getitem__(self, idx):
-        np.random.seed(datetime.datetime.now().microsecond)
         item = self.annotation.iloc[idx]
 
         image = self._get_image(item['image'])
