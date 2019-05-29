@@ -12,11 +12,9 @@ import torch.utils.data as data
 
 
 class Train(data.Dataset):
-    def __init__(self, folder, dataset, transforms=None):
-        self.folder = os.path.join(folder, dataset)
-        self.annotation = pd.read_csv(os.path.join(folder,
-                                                   dataset,
-                                                   'train.csv'))
+    def __init__(self, folder, transforms=None):
+        self.folder = folder
+        self.annotation = pd.read_csv(os.path.join(folder, 'train.csv'))
         self.transforms = transforms
 
     def __len__(self):

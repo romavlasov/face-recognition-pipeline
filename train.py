@@ -71,8 +71,7 @@ def main(config):
                                                   gamma=0.1)
     
     transforms = Transforms(input_size=config['input_size'], train=True)
-    data_loader = DataLoader(insightface.Train(folder=config['train']['folder'], 
-                                               dataset=config['train']['dataset'],
+    data_loader = DataLoader(insightface.Train(folder=config['train']['folder'],
                                                transforms=transforms),
                              batch_size=config['batch_size'], 
                              num_workers=config['num_workers'],
