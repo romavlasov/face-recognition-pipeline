@@ -1,16 +1,20 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class FocalLoss(nn.Module):
-    def __init__(self, gamma=0, eps=1e-7):
+    def __init__(self, alpha=1, gamma=2, reduce=True):
         super(FocalLoss, self).__init__()
+        self.alpha = alpha
         self.gamma = gamma
-        self.eps = eps
-        self.ce = nn.CrossEntropyLoss()
+        self.reduce = reduce
 
-    def forward(self, input, target):
-        logp = self.ce(input, target)
-        p = torch.exp(-logp)
-        loss = (1 - p) ** self.gamma * logp
-        return loss.mean()
+    def forward(self, inputs, targets):
+        ce = F.cross_entropy(inputs, targets, reduction='none')
+        p = torch.exp(-ce)
+        loss = self.alpha * (1 - p) ** self.gamma * ce
+
+        if self.reduce:
+            return torch.mean(loss)
+        return loss
