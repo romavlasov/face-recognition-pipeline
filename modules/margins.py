@@ -36,7 +36,7 @@ class ArcMarginProduct(nn.Module):
 
         output = (one_hot * phi) + ((1.0 - one_hot) * cosine)
         output = output * self.s
-        return output
+        return output, cosine
 
 
 class AddMarginProduct(nn.Module):
@@ -60,7 +60,7 @@ class AddMarginProduct(nn.Module):
         output = (one_hot * phi) + ((1.0 - one_hot) * cosine)
         output *= self.s
 
-        return output
+        return output, cosine
 
 
 def arc_margin(in_features, out_features, s=64.0, m=0.50, easy_margin=False, device='cpu'):
