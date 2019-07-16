@@ -101,12 +101,12 @@ def train(data_loader, model, margin, criterion, optimizer, epoch):
         optimizer.zero_grad()
         
         feature = model(image)
-        output = margin(feature, target)
+        output, cosine = margin(feature, target)
 
         loss = criterion(output, target)
         losses.update(loss.item(), image.size(0))
         
-        acc_1, acc_n = accuracy(output, target, topk=(1, 10))
+        acc_1, acc_n = accuracy(cosine, target, topk=(1, 10))
         top_1.update(acc_1[0], image.size(0))
         top_n.update(acc_n[0], image.size(0))
         
