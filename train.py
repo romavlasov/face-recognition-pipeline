@@ -71,34 +71,37 @@ def main(config):
                                                   gamma=0.1)
     
     transforms = Transforms(input_size=config['input_size'], train=True)
-    data_loader = DataLoader(insightface.Train(folder=config['train']['folder'],
+    data_loader = DataLoader(insightface.Train(folder=config['train']['folder'], 
+                                               dataset=config['train']['dataset'],
                                                transforms=transforms),
                              batch_size=config['batch_size'], 
                              num_workers=config['num_workers'],
                              shuffle=True)
     
-    for epoch in range(config['num_epochs']):
+    for epoch in range(config['snapshot']['epoch'] if config['snapshot']['use'] else 0, config['num_epochs']):
+        print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        
         lr_scheduler.step()
-        train(data_loader, model, margin, criterion, optimizer, epoch)
+        train(data_loader, model, margin, criterion, optimizer, epoch, config)
         
         if (epoch + 1) % config['save_freq'] == 0:
             save_weights(model, config['prefix'], 'model', epoch + 1, config['parallel'])
             save_weights(margin, config['prefix'], 'margin', epoch + 1, config['parallel'])
         
 
-def train(data_loader, model, margin, criterion, optimizer, epoch):
+def train(data_loader, model, margin, criterion, optimizer, epoch, config):
     top_1 = AverageMeter()
     top_n = AverageMeter()
     losses = AverageMeter()
     
     model.train()
     margin.train()
+
+    tq = tqdm(total=len(data_loader) * config['batch_size'])
     
     for i, (image, target) in enumerate(data_loader):
         image = image.to(device)
         target = target.to(device)
-        
-        optimizer.zero_grad()
         
         feature = model(image)
         output, cosine = margin(feature, target)
@@ -109,24 +112,21 @@ def train(data_loader, model, margin, criterion, optimizer, epoch):
         acc_1, acc_n = accuracy(cosine, target, topk=(1, 10))
         top_1.update(acc_1[0], image.size(0))
         top_n.update(acc_n[0], image.size(0))
-        
+
         loss.backward()
-        optimizer.step()
-        
-        current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        if (i + 1) % config['step'] == 0:
+            optimizer.step()
+            optimizer.zero_grad()
+
         current_lr = get_learning_rate(optimizer)
-        iter_ = i + (epoch * len(data_loader)) + 1
-        
-        if (iter_ + 1) % 100 == 0:
-            print(' Time: {}'
-                  ' Lr: {:.2e}'
-                  ' Epoch: {} -'
-                  ' Iter: {} -'
-                  ' Loss: {:.4f} -'
-                  ' Top1: {:.4f} -'
-                  ' Top10: {:.4f}'.format(current_time, current_lr,
-                                          epoch + 1, iter_ + 1, 
-                                          losses.val, top_1.val, top_n.val))
+
+        tq.set_description('Epoch {}, lr {:.2e}'.format(epoch + 1, current_lr))
+        tq.set_postfix(loss='{:.4f}'.format(losses.avg),
+                       top_1='{:.4f}'.format(top_1.avg),
+                       top_n='{:.4f}'.format(top_n.avg))
+        tq.update(config['batch_size'])
+
+    tq.close()
 
 
 def validation(data_loader, model):

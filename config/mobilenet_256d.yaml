@@ -18,9 +18,10 @@ momentum: 0.9
 milestones: [6, 12, 18, 24]
 batch_size: 512
 num_epochs: 30
+step: 1
 
 train:
-    folder: '/data/home/rvlasov/data/insightface'
+    folder: '/shared/users/rvlasov/data/insightface'
     dataset: 'ms1mv2'
 
 snapshot:
@@ -28,7 +29,7 @@ snapshot:
     epoch: 25
     
 validataion:
-    folder: '/data/home/rvlasov/data/insightface'
+    folder: '/shared/users/rvlasov/data/insightface'
     dataset: ['lfw', 'cfp_fp', 'agedb_30']
     batch_size: 8
     epoch: 5

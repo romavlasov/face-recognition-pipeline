@@ -18,3 +18,7 @@ class FocalLoss(nn.Module):
         if self.reduce:
             return torch.mean(loss)
         return loss
+        
+        
+def focal(*argv, **kwargs):
+    return FocalLoss(*argv, **kwargs)

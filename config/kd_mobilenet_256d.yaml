@@ -1,0 +1,53 @@
+parallel: yes
+save_freq: 3
+num_workers: 16
+model_name: 'mobilenet'
+features: 256
+prefix: 'kd_mobilenet_256d'
+
+teacher:
+    model_name: 'se_resnext50'
+    margin_name: 'arc_margin'
+    features: 256
+    num_classes: 85742
+    prefix: 'se_resnext50_256d'
+
+student:
+    model_name: 'mobilenet'
+    margin_name: 'arc_margin'
+    features: 256
+    num_classes: 85742
+    prefix: 'kd_mobilenet_256d'
+
+input_size: 112
+criterion: 'kd'
+optimizer: 'SGD'
+
+temperature: 5.0
+alpha: 0.9
+ce_weight: 0.5
+mse_weight: 0.5
+
+learning_rate: 0.5
+weight_decay: 0.0001
+momentum: 0.9
+milestones: [6, 12, 24, 32, 48]
+batch_size: 512
+step: 1
+num_epochs: 30
+
+train:
+    folder: '/shared/users/rvlasov/data/insightface'
+    dataset: 'ms1mv2'
+
+snapshot:
+    use: no
+    epoch: 30
+    
+validataion:
+    folder: '/shared/users/rvlasov/data/insightface'
+    dataset: ['lfw', 'cfp_fp', 'agedb_30']
+    batch_size: 8
+    epoch: 40
+    flip: yes
+    #weights: 'weights/mobilenet_256d_30e.pth'
