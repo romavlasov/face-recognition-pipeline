@@ -10,6 +10,7 @@ class KDLoss(nn.Module):
         super(KDLoss, self).__init__()
         self.t = t
         self.alpha = alpha
+        self.focal = losses.focal()
         self.reduce = reduce
 
     def forward(self, teacher_output, teacher_cosine, teacher_feature, 
@@ -21,11 +22,11 @@ class KDLoss(nn.Module):
 
         kl = F.kl_div(soft_log_probs, soft_targets, reduction='batchmean') * (self.t ** 2) * self.alpha
 
-        ce = losses.focal_loss(student_output, targets) * (1 - self.alpha)
+        focal = self.focal(student_output, targets) * (1 - self.alpha)
 
         mse = F.mse_loss(student_feature, teacher_feature, reduction='mean')
 
-        return kl, ce, mse
+        return kl, focal, mse
 
         # loss = kl + ce + mse
 
