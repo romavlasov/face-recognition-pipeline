@@ -112,8 +112,8 @@ def main(config):
     for epoch in range(config['num_epochs']):
         print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         
-        lr_scheduler.step()
         train(data_loader, teacher, student, criterion, optimizer, epoch, config)
+        lr_scheduler.step()
         
         if (epoch + 1) % config['save_freq'] == 0:
             student.save_weights(epoch + 1, config['parallel'])
