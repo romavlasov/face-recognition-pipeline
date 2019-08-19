@@ -1,6 +1,6 @@
 parallel: yes
 save_freq: 3
-num_workers: 16
+num_workers: 8
 model_name: 'mobilenet'
 features: 256
 prefix: 'kd_mobilenet_256d'
@@ -23,21 +23,21 @@ input_size: 112
 criterion: 'kd'
 optimizer: 'SGD'
 
-temperature: 5.0
+temperature: 10.0
 alpha: 0.9
-ce_weight: 0.5
-mse_weight: 0.5
+ce_weight: 0.9
+mse_weight: 0.1
 
 learning_rate: 0.5
 weight_decay: 0.0001
 momentum: 0.9
-milestones: [6, 12, 24, 32, 48]
-batch_size: 512
-step: 1
+milestones: [6, 12, 18, 24]
+batch_size: 256
+step: 2
 num_epochs: 30
 
 train:
-    folder: '/shared/users/rvlasov/data/insightface'
+    folder: '/media/data/insightface'
     dataset: 'ms1mv2'
 
 snapshot:
@@ -45,7 +45,7 @@ snapshot:
     epoch: 30
     
 validataion:
-    folder: '/shared/users/rvlasov/data/insightface'
+    folder: '/media/data/insightface'
     dataset: ['lfw', 'cfp_fp', 'agedb_30']
     batch_size: 8
     epoch: 40
