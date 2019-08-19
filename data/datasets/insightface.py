@@ -12,8 +12,8 @@ import torch.utils.data as data
 
 
 class Train(data.Dataset):
-    def __init__(self, folder, transforms=None):
-        self.folder = folder
+    def __init__(self, folder, dataset, transforms=None):
+        self.folder = os.path.join(folder, dataset)
         self.annotation = pd.read_csv(os.path.join(folder, 'train.csv'))
         self.transforms = transforms
 
