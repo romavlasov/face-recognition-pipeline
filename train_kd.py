@@ -77,7 +77,7 @@ class BaseModel(nn.Module):
 
 def main(config):
     teacher = BaseModel(**config['teacher'])
-    teacher.load_weight(20)
+    teacher.load_weight(25)
     teacher.disable_grad()
 
     student = BaseModel(**config['student'])
