@@ -81,8 +81,8 @@ def main(config):
     for epoch in range(config['snapshot']['epoch'] if config['snapshot']['use'] else 0, config['num_epochs']):
         print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         
-        lr_scheduler.step()
         train(data_loader, model, margin, criterion, optimizer, epoch, config)
+        lr_scheduler.step()
         
         if (epoch + 1) % config['save_freq'] == 0:
             save_weights(model, config['prefix'], 'model', epoch + 1, config['parallel'])
