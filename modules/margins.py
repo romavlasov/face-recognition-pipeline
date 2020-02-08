@@ -5,13 +5,17 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+__all__ = ['arc_margin', 'cos_margin']
+
+
 class ArcMarginProduct(nn.Module):
-    def __init__(self, in_features, out_features, s=64.0, m=0.50, easy_margin=False):
+    def __init__(self, in_features, out_features, s=64.0, m=0.50, easy_margin=False, mode='train'):
         super(ArcMarginProduct, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.s = s
         self.m = m
+        self.mode = mode
         self.weight = nn.Parameter(torch.FloatTensor(out_features, in_features))
         nn.init.xavier_uniform_(self.weight)
 
@@ -21,9 +25,13 @@ class ArcMarginProduct(nn.Module):
         self.th = math.cos(math.pi - m)
         self.mm = math.sin(math.pi - m) * m
 
-    def forward(self, input, target):
+    def forward(self, input, target=None):
         cosine = F.linear(F.normalize(input), F.normalize(self.weight))
         cosine = cosine.clamp(-1, 1)
+
+        if self.mode == 'test':
+            return None, cosine
+
         sine = torch.sqrt(1.0 - torch.pow(cosine, 2))
         phi = cosine * self.cos_m - sine * self.sin_m
         if self.easy_margin:
@@ -40,18 +48,23 @@ class ArcMarginProduct(nn.Module):
 
 
 class AddMarginProduct(nn.Module):
-    def __init__(self, in_features, out_features, s=30.0, m=0.40):
+    def __init__(self, in_features, out_features, s=30.0, m=0.40, mode='train'):
         super(AddMarginProduct, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.s = s
         self.m = m
-        self.weight = Parameter(torch.FloatTensor(out_features, in_features))
+        self.mode = mode
+        self.weight = nn.Parameter(torch.FloatTensor(out_features, in_features))
         nn.init.xavier_uniform_(self.weight)
 
     def forward(self, input, target):
         cosine = F.linear(F.normalize(input), F.normalize(self.weight))
         cosine = cosine.clamp(-1, 1)
+        
+        if self.mode == 'test':
+            return None, cosine
+
         phi = cosine - self.m
 
         one_hot = torch.zeros(cosine.size(), device='cuda')
@@ -63,11 +76,11 @@ class AddMarginProduct(nn.Module):
         return output, cosine
 
 
-def arc_margin(in_features, out_features, s=64.0, m=0.50, easy_margin=False, device='cpu'):
-    margin = ArcMarginProduct(in_features, out_features, s, m, easy_margin)
+def arc_margin(in_features, out_features, s=30.0, m=0.50, easy_margin=False, device='cpu', mode='train'):
+    margin = ArcMarginProduct(in_features, out_features, s, m, easy_margin, mode)
     return margin.to(device)
 
 
-def add_margin(in_features, out_features, s=30.0, m=0.40, device='cpu'):
-    margin = AddMarginProduct(in_features, out_features, s, m)
+def add_margin(in_features, out_features, s=30.0, m=0.40, device='cpu', mode='train'):
+    margin = ArcMarginProduct(in_features, out_features, s, m, mode)
     return margin.to(device)

@@ -4,7 +4,7 @@ import torch.nn as nn
 
 
 class SELayer(nn.Module):
-    def __init__(self, inplanes, squeeze_ratio=8, activation=nn.PReLU, size=None):
+    def __init__(self, inplanes, squeeze_ratio=8, size=None):
         super(SELayer, self).__init__()
         if size is not None:
             self.global_avgpool = nn.AvgPool2d(size)
@@ -35,16 +35,16 @@ class InvertedResidual(nn.Module):
         self.inv_block = nn.Sequential(
             nn.Conv2d(in_channels, in_channels * expand_ratio, 1, 1, 0, bias=False),
             nn.BatchNorm2d(in_channels * expand_ratio),
-            nn.PReLU(),
+            nn.ReLU(inplace=True),
 
             nn.Conv2d(in_channels * expand_ratio, in_channels * expand_ratio, 3, stride, 1,
                       groups=in_channels * expand_ratio, bias=False),
             nn.BatchNorm2d(in_channels * expand_ratio),
-            nn.PReLU(),
+            nn.ReLU(inplace=True),
 
             nn.Conv2d(in_channels * expand_ratio, out_channels, 1, 1, 0, bias=False),
             nn.BatchNorm2d(out_channels),
-            SELayer(out_channels, 8, nn.PReLU, outp_size)
+            SELayer(out_channels, 8, outp_size)
         )
 
     def forward(self, x):
@@ -54,7 +54,7 @@ class InvertedResidual(nn.Module):
         return self.inv_block(x)
 
 
-def init_block(in_channels, out_channels, stride, activation=nn.PReLU):
+def init_block(in_channels, out_channels, stride):
     return nn.Sequential(
         nn.BatchNorm2d(3),
         nn.Conv2d(in_channels, out_channels, 3, stride, 1, bias=False),
@@ -63,9 +63,9 @@ def init_block(in_channels, out_channels, stride, activation=nn.PReLU):
     )
 
 
-class MobileNet(nn.Module):
+class VanilaMobileNet(nn.Module):
     def __init__(self, out_features=256, input_size=112, width_multiplier=1., feature=True):
-        super(MobileNet, self).__init__()
+        super(VanilaMobileNet, self).__init__()
         self.feature = feature
 
         # Set up of inverted residual blocks
@@ -85,7 +85,7 @@ class MobileNet(nn.Module):
         self.features.append(nn.Conv2d(first_channel_num, first_channel_num, 3, 1, 1,
                                        groups=first_channel_num, bias=False))
         self.features.append(nn.BatchNorm2d(64))
-        self.features.append(nn.PReLU())
+        self.features.append(nn.ReLU(inplace=True))
 
         # Inverted Residual Blocks
         in_channel_num = first_channel_num
@@ -106,7 +106,7 @@ class MobileNet(nn.Module):
         # 1x1 expand block
         self.features.append(nn.Sequential(nn.Conv2d(in_channel_num, last_channel_num, 1, 1, 0, bias=False),
                                            nn.BatchNorm2d(last_channel_num),
-                                           nn.PReLU()))
+                                           nn.ReLU(inplace=True)))
         self.features = nn.Sequential(*self.features)
 
         # Depth-wise pooling

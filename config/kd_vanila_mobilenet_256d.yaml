@@ -1,9 +1,9 @@
 parallel: yes
 save_freq: 1
 num_workers: 16
-model_name: 'mobilenet'
+model_name: 'vanila_mobilenet'
 features: 256
-prefix: 'kd_mobilenet_256d'
+prefix: 'kd_vanila_mobilenet_256d'
 
 teacher:
     model_name: 'se_resnext50'
@@ -13,11 +13,11 @@ teacher:
     prefix: 'se_resnext50_256d'
 
 student:
-    model_name: 'mobilenet'
+    model_name: 'vanila_mobilenet'
     margin_name: 'arc_margin'
     features: 256
     num_classes: 85742
-    prefix: 'kd_mobilenet_256d'
+    prefix: 'kd_vanila_mobilenet_256d'
 
 input_size: 112
 criterion: 'kd'
@@ -48,12 +48,12 @@ train:
 
 snapshot:
     use: no
-    epoch: 30
+    epoch: 15
     
 validataion:
     folder: '/shared/users/rvlasov/data/insightface'
     dataset: ['lfw', 'cfp_fp', 'agedb_30']
     batch_size: 8
-    epoch: 24
+    epoch: 28
     flip: yes
     #weights: 'weights/mobilenet_256d_30e.pth'

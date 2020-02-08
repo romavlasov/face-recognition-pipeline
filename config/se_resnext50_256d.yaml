@@ -32,6 +32,6 @@ validataion:
     folder: '/shared/users/rvlasov/data/insightface'
     dataset: ['lfw', 'cfp_fp', 'agedb_30']
     batch_size: 8
-    epoch: 15
+    epoch: 30
     flip: yes
     #weights: 'weights/se_resnext50_256d_30e.pth'

@@ -45,29 +45,29 @@ class BaseModel(nn.Module):
                                                     out_features=num_classes, 
                                                     device=device)
 
+    def load_model(self, prefix, epoch):
+        load_weights(self.model, prefix, 'model', epoch)
+
+    def load_margin(self, prefix, epoch):
+        load_weights(self.margin, prefix, 'margin', epoch)
+
     def load_weight(self, epoch):
-        load_weights(self.model, self.prefix, 'model', epoch)
-        load_weights(self.margin, self.prefix, 'margin', epoch)
+        self.load_model(self.prefix, epoch)
+        self.load_margin(self.prefix, epoch)
 
     def save_weights(self, epoch, parallel=True):
         save_weights(self.model, self.prefix, 'model', epoch, parallel)
-        save_weights(self.margin, self.prefix, 'margin', epoch, parallel)
+        #save_weights(self.margin, self.prefix, 'margin', epoch, parallel)
 
     def parallel(self):
         self.model = nn.DataParallel(self.model)
         self.margin = nn.DataParallel(self.margin)
 
-    def enable_grad(self):
+    def set_grad(self, model=True, margin=True):
         for param in self.model.parameters():
-            param.requires_grad = True
+            param.requires_grad = model
         for param in self.margin.parameters():
-            param.requires_grad = True
-
-    def disable_grad(self):
-        for param in self.model.parameters():
-            param.requires_grad = False
-        for param in self.margin.parameters():
-            param.requires_grad = False
+            param.requires_grad = margin
 
     def forward(self, x, target):
         feature = self.model(x)
@@ -77,11 +77,18 @@ class BaseModel(nn.Module):
 
 def main(config):
     teacher = BaseModel(**config['teacher'])
-    teacher.load_weight(20)
-    teacher.disable_grad()
+    teacher.load_weight(25)
+    teacher.set_grad(model=False, margin=False)
 
     student = BaseModel(**config['student'])
-    student.enable_grad()
+
+    if config['model_transfer']:
+        student.load_model('mobilenet_256d', 30)
+
+    if config['margin_transfer']:
+        student.load_margin(config['teacher']['prefix'], 25)
+
+    student.set_grad(model=config['model_grad'], margin=config['margin_grad'])
 
     if config['snapshot']['use']:
         student.load_weight(config['snapshot']['epoch'])
@@ -90,7 +97,7 @@ def main(config):
         teacher.parallel()
         student.parallel()
 
-    criterion = getattr(losses, config['criterion'])(t=config['temperature'], alpha=config['alpha'])
+    criterion = getattr(losses, config['criterion'])()
         
     optimizer = optim.SGD(student.parameters(),
                           lr=config['learning_rate'],
@@ -113,16 +120,23 @@ def main(config):
         print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         
         lr_scheduler.step()
-        train(data_loader, teacher, student, criterion, optimizer, epoch, config)
+        train(data_loader, 
+              teacher, 
+              student, 
+              criterion, optimizer, epoch, config)
         
         if (epoch + 1) % config['save_freq'] == 0:
             student.save_weights(epoch + 1, config['parallel'])
         
 
-def train(data_loader, teacher, student, criterion, optimizer, epoch, config):
+def train(data_loader, 
+          teacher, 
+          student, 
+          criterion, optimizer, epoch, config):
+    
     top_1 = AverageMeter()
     top_n = AverageMeter()
-    kl_losses = AverageMeter()
+#     kl_losses = AverageMeter()
     ce_losses = AverageMeter()
     mse_losses = AverageMeter()
     
@@ -138,15 +152,15 @@ def train(data_loader, teacher, student, criterion, optimizer, epoch, config):
         teacher_output, teacher_cosine, teacher_feature = teacher(image, target)
         student_output, student_cosine, student_feature = student(image, target)
 
-        kl_loss, ce_loss, mse_loss = criterion(teacher_output, teacher_cosine, teacher_feature, 
-                                               student_output, student_cosine, student_feature, 
-                                               target)
+        ce_loss, mse_loss = criterion(teacher_output, teacher_cosine, teacher_feature, 
+                                      student_output, student_cosine, student_feature, 
+                                      target)
 
-        kl_losses.update(kl_loss.item())
+#         kl_losses.update(kl_loss.item())
         ce_losses.update(ce_loss.item())
         mse_losses.update(mse_loss.item())
 
-        loss = (kl_loss + ce_loss) * config['ce_weight'] + mse_loss * config['mse_weight']
+        loss = ce_loss * config['ce_weight'] + mse_loss * config['mse_weight']
         
         acc_1, acc_n = accuracy(student_cosine, target, topk=(1, 10))
         top_1.update(acc_1.item())
@@ -160,8 +174,8 @@ def train(data_loader, teacher, student, criterion, optimizer, epoch, config):
         current_lr = get_learning_rate(optimizer)
 
         tq.set_description('Epoch {}, lr {:.2e}'.format(epoch + 1, current_lr))
-        tq.set_postfix(kl_loss='{:.4f}'.format(kl_losses.avg),
-                       ce_loss='{:.4f}'.format(ce_losses.avg),
+        tq.set_postfix(ce_loss='{:.4f}'.format(ce_losses.avg),
+#                        kl_loss='{:.4f}'.format(kl_losses.avg),
                        mse_loss='{:.4f}'.format(mse_losses.avg),
                        top_1='{:.4f}'.format(top_1.avg),
                        top_n='{:.4f}'.format(top_n.avg))

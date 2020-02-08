@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 
 from models.backbones.mobilenet import MobileNet
+from models.backbones.vanila_mobilenet import VanilaMobileNet
 
 from models.backbones.nasnet_mobile import NASNetAMobile
 
@@ -19,6 +20,11 @@ from models.backbones.xception import Xception
 
 def mobilenet(device='cpu', *argv, **kwargs):
     model = MobileNet(*argv, **kwargs)
+    return model.to(device)
+
+
+def vanila_mobilenet(device='cpu', *argv, **kwargs):
+    model = VanilaMobileNet(*argv, **kwargs)
     return model.to(device)
 
 

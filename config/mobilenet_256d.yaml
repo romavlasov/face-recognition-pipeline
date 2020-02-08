@@ -16,7 +16,7 @@ learning_rate: 0.5
 weight_decay: 0.0001
 momentum: 0.9
 milestones: [6, 12, 18, 24]
-batch_size: 512
+batch_size: 256
 num_epochs: 30
 step: 1
 
