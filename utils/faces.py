@@ -28,15 +28,7 @@ def face_align(img, landmarks, d_size=(400, 400), normalized=False, show=False):
 
 
 def transformation_from_points(points1, points2):
-    """
-    Return an affine transformation [s * R | T] such that:
-        sum ||s*R*p1 + T - p2||^2
-    is minimized.
-    """
-    # Solve the procrustes problem by subtracting centroids, scaling by the
-    # standard deviation, and then using the SVD to calculate the rotation. See
-    # the following for more details:
-    #   https://en.wikipedia.org/wiki/Orthogonal_Procrustes_problem
+    # https://en.wikipedia.org/wiki/Orthogonal_Procrustes_problem
     
     points1 = points1.astype(np.float64)
     points2 = points2.astype(np.float64)
